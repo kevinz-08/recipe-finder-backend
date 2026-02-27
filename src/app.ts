@@ -2,6 +2,12 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import registerRoutes from "./routes/register";
+import loginRoutes from "./routes/login";
+import refreshTokenRoutes from "./routes/refresh-token";
+import signoutRoutes from "./routes/signout";
+import userRoutes from "./routes/user";
+import todosRoutes from "./routes/todos";
 
 import authenticate from "./auth/authenticate";
 
@@ -30,12 +36,12 @@ async function main(): Promise<void> {
 
 main();
 
-app.use("/api/register", require("./routes/register"));
-app.use("/api/login", require("./routes/login"));
-app.use("/api/user", authenticate, require("./routes/user"));
-app.use("/api/todos", authenticate, require("./routes/todos"));
-app.use("/api/refresh-token", require("./routes/refresh-token"));
-app.use("/api/signout", require("./routes/signout"));
+app.use("/api/register", registerRoutes);
+app.use("/api/login", loginRoutes);
+app.use("/api/refresh-token", refreshTokenRoutes);
+app.use("/api/signout", signoutRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/todos", todosRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");
