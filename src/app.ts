@@ -47,6 +47,14 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello World");
 });
 
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello World");
+});
+
+app.get("/health", (req: Request, res: Response) => {
+  res.json({ status: "ok" });
+});
+
 app.listen(port, () => {
   console.log(`Server is Running on port: ${port}`);
 });
