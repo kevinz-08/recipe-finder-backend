@@ -2,24 +2,19 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import registerRoutes from "./routes/register";
-import loginRoutes from "./routes/login";
-import refreshTokenRoutes from "./routes/refresh-token";
-import signoutRoutes from "./routes/signout";
-import userRoutes from "./routes/user";
-import todosRoutes from "./routes/todos";
 
-import authenticate from "./auth/authenticate";
+import routes from "./routes";
 
 dotenv.config();
 
 const app = express();
-
 const port: number = Number(process.env.PORT) || 5000;
 
+// middlewares
 app.use(cors());
 app.use(express.json());
 
+// db connection
 async function main(): Promise<void> {
   try {
     if (!process.env.DB_CONNECTION_STRING) {
@@ -36,25 +31,20 @@ async function main(): Promise<void> {
 
 main();
 
-app.use("/api/register", registerRoutes);
-app.use("/api/login", loginRoutes);
-app.use("/api/refresh-token", refreshTokenRoutes);
-app.use("/api/signout", signoutRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/todos", todosRoutes);
+// rutas centralizadas aqui
+app.use("/api", routes);
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World");
-});
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello World");
-});
-
+// health check
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "ok" });
 });
 
+// root
+app.get("/", (req: Request, res: Response) => {
+  res.send("API Running");
+});
+
+// server
 app.listen(port, () => {
   console.log(`Server is Running on port: ${port}`);
 });
