@@ -4,17 +4,12 @@ import { getRandomRecipes } from "../services/spoonacular.service";
 
 const router = Router();
 
-router.get("/popular", async (req, res) => {
-  try {
-    const data = await getRandomRecipes();
-    res.json(data);
-  } catch (error: any) {
-    console.error("ERROR REAL:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
+let cachedRecipes: any = null;
+let lastFetchTime = 0;
 
-// luego otras
+const CACHE_DURATION = 1000 * 60 * 60 * 5;
+
+// buscar recetas
 router.get("/search", async (req, res) => {
   try {
     const query = req.query.q as string;
@@ -25,7 +20,37 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// ❗ SIEMPRE al final las dinámicas
+router.get("/popular", async (req, res) => {
+  try {
+    const now = Date.now();
+
+    // usar cache si no ha expirado
+    if (cachedRecipes && now - lastFetchTime < CACHE_DURATION) {
+      console.log("Usando cache (backend)");
+      return res.json(cachedRecipes);
+    }
+
+    //llamar la api
+    console.log("Llamando a Spoonacular...");
+    const data = await getRandomRecipes();
+
+    cachedRecipes = data;
+    lastFetchTime = now;
+
+    res.json(data);
+  } catch (error: any) {
+    console.error("Error en /popular:", error);
+
+    // fallback si ya habia cache
+    if (cachedRecipes) {
+      return res.json(cachedRecipes);
+    }
+
+    res.status(500).json({ error: "Error fetching popular recipes" });
+  }
+});
+
+// get by id
 router.get("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
