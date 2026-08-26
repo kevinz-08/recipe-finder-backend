@@ -6,6 +6,7 @@ import signoutRoutes from "./signout";
 import userRoutes from "./user";
 import todosRoutes from "./todos";
 import recipesRoutes from "./recipes";
+import favoritesRoutes from "./favorites";
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use("/signout", signoutRoutes);
 router.use("/user", userRoutes);
 router.use("/todos", todosRoutes);
 router.use("/recipes", recipesRoutes); // spoonacular
+router.use("/favorites", favoritesRoutes);
 
 export default router;
