@@ -4,9 +4,7 @@ import { generateAccesToken, generateRefreshToken } from "../auth/generateTokens
 import getUserInfo from "../lib/getUserInfo";
 import Token from "./token";
 
-/* ============================= */
-/* 1️⃣  Interface del Documento */
-/* ============================= */
+/* Interface del Documento */
 
 export interface IUser {
   name: string;
@@ -20,9 +18,7 @@ export interface IUser {
 
 export type UserDocument = HydratedDocument<IUser>;
 
-/* ============================= */
-/* 2️⃣  Schema */
-/* ============================= */
+/* Schema */
 
 const UserSchema = new Schema<IUser>({
   name: { type: String, required: true, trim: true },
@@ -36,9 +32,8 @@ const UserSchema = new Schema<IUser>({
   password: { type: String, required: true },
 });
 
-/* ============================= */
-/* 3️⃣  Middleware pre-save */
-/* ============================= */
+
+/* Middleware pre-save */
 
 UserSchema.pre("save", async function (this: UserDocument) {
   if (!this.isModified("password")) return;
@@ -47,9 +42,7 @@ UserSchema.pre("save", async function (this: UserDocument) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-/* ============================= */
-/* 4️⃣  Métodos personalizados */
-/* ============================= */
+/* Métodos personalizados */
 
 UserSchema.methods.comparePassword = async function (
   this: UserDocument,
@@ -77,9 +70,7 @@ UserSchema.methods.createRefreshToken = async function (
   }
 };
 
-/* ============================= */
-/* 5️⃣  Modelo */
-/* ============================= */
+/* Modelo */
 
 const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
 
