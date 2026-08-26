@@ -26,9 +26,13 @@ router.post("/", async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const { id, title, image } = req.body;
 
+    if (!Number.isInteger(Number(id))) {
+      return res.status(400).json({ error: "Invalid recipe id" });
+    }
+
     const favorite = await Favorite.create({
       userId,
-      recipeId: id,
+      recipeId: Number(id),
       title,
       image,
     });
@@ -48,6 +52,10 @@ router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const recipeId = Number(req.params.id);
+
+    if (!Number.isInteger(recipeId)) {
+      return res.status(400).json({ error: "Invalid recipe id" });
+    }
 
     await Favorite.findOneAndDelete({ userId, recipeId });
 

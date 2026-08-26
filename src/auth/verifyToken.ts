@@ -4,6 +4,7 @@ interface AccessTokenPayload extends JwtPayload {
   user: {
     id: string;
     email: string;
+    name: string;
   };
 }
 

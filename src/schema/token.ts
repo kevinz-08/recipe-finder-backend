@@ -4,12 +4,15 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IToken extends Document {
   token: string;
+  createdAt: Date;
 }
 
 /* Schema Tipado */
 
 const TokenSchema: Schema<IToken> = new Schema<IToken>({
-  token: { type: String, required: true },
+  token: { type: String, required: true, unique: true },
+  // mismo tiempo de vida que el refresh token, para no acumular basura
+  createdAt: { type: Date, default: Date.now, expires: "7d" },
 });
 
 /* Modelo */
