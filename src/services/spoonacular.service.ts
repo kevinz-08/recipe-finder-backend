@@ -1,29 +1,46 @@
 const BASE_URL = "https://api.spoonacular.com";
 
-export async function searchRecipes(query: string) {
-  const res = await fetch(
-    `${BASE_URL}/recipes/complexSearch?query=${query}&number=10&apiKey=${process.env.SPOONACULAR_API_KEY}`,
-  );
+type SearchParams = {
+  query?: string;
+  cuisine?: string;
+  diet?: string;
+  sort?: string;
+  maxReadyTime?: string;
+};
 
-  if (!res.ok) throw new Error("Error fetching recipes");
+export async function searchRecipes(params: SearchParams) {
+  const url = new URL("https://api.spoonacular.com/recipes/complexSearch");
 
-  return res.json();
-}
+  if (params.query) url.searchParams.append("query", params.query);
+  if (params.cuisine && params.cuisine !== "All Categories") {
+    url.searchParams.append("cuisine", params.cuisine.toLowerCase());
+  }
 
-export async function getRecipeById(id: number) {
-  const res = await fetch(
-    `${BASE_URL}/recipes/${id}/information?apiKey=${process.env.SPOONACULAR_API_KEY}`,
-  );
+  if (params.diet) url.searchParams.append("diet", params.diet.toLowerCase());
 
-  if (!res.ok) throw new Error("Error fetching recipe");
+  // filtros inteligentes
+  if (params.sort === "Popularity") {
+    url.searchParams.append("sort", "popularity");
+  }
 
-  return res.json();
+  if (params.sort === "Healthy" && !params.diet) {
+    url.searchParams.append("diet", "healthy");
+  }
+
+  if (params.sort === "Fast") {
+    url.searchParams.append("maxReadyTime", "20");
+  }
+
+  url.searchParams.append("apiKey", process.env.SPOONACULAR_API_KEY!);
+
+  const response = await fetch(url.toString());
+  return response.json();
 }
 
 export async function getRandomRecipes() {
-    console.log("API KEY:", process.env.SPOONACULAR_API_KEY);
+  console.log("API KEY:", process.env.SPOONACULAR_API_KEY);
   const res = await fetch(
-    `https://api.spoonacular.com/recipes/random?number=12&apiKey=${process.env.SPOONACULAR_API_KEY}`
+    `https://api.spoonacular.com/recipes/random?number=12&apiKey=${process.env.SPOONACULAR_API_KEY}`,
   );
 
   if (!res.ok) {
@@ -33,4 +50,46 @@ export async function getRandomRecipes() {
   }
 
   return res.json();
+}
+
+export async function getRecipeById(id: number) {
+  const API_KEY = process.env.SPOONACULAR_API_KEY;
+
+  const [infoRes, nutritionRes] = await Promise.all([
+    fetch(`${BASE_URL}/recipes/${id}/information?apiKey=${API_KEY}`),
+    fetch(`${BASE_URL}/recipes/${id}/nutritionWidget.json?apiKey=${API_KEY}`),
+  ]);
+
+  if (!infoRes.ok) {
+    throw new Error("Error fetching recipe info");
+  }
+
+  const info = await infoRes.json();
+
+  // nutrición puede fallar
+  let nutrition = null;
+  if (nutritionRes.ok) {
+    const n = await nutritionRes.json();
+    nutrition = {
+      calories: n.calories,
+      protein: n.protein,
+      carbs: n.carbs,
+      fat: n.fat,
+    };
+  }
+
+  // limpieza y adaptación para frontend
+  return {
+    id: info.id,
+    title: info.title,
+    image: info.image,
+    summary: info.summary?.replace(/<[^>]+>/g, ""), // quitar HTML
+    readyInMinutes: info.readyInMinutes,
+    servings: info.servings,
+
+    extendedIngredients: info.extendedIngredients || [],
+    analyzedInstructions: info.analyzedInstructions || [],
+
+    nutrition,
+  };
 }

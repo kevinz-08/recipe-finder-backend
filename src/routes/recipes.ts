@@ -9,13 +9,22 @@ let lastFetchTime = 0;
 
 const CACHE_DURATION = 1000 * 60 * 60 * 5;
 
-// buscar recetas
-router.get("/search", async (req, res) => {
+// buscar recetas, ahora tiene filtros inteligentes ademas de las queries
+router.get("/", async (req, res) => {
   try {
-    const query = req.query.q as string;
-    const data = await searchRecipes(query);
+    const { query, cuisine, diet, sort, maxReadyTime } = req.query;
+
+    const data = await searchRecipes({
+      query: query as string,
+      cuisine: cuisine as string,
+      diet: diet as string,
+      sort: sort as string,
+      maxReadyTime: maxReadyTime as string,
+    });
+
     res.json(data);
   } catch (error) {
+    console.error("Error en /recipes:", error);
     res.status(500).json({ error: "Error searching recipes" });
   }
 });
