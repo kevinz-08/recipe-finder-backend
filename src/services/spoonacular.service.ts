@@ -9,7 +9,7 @@ type SearchParams = {
 };
 
 export async function searchRecipes(params: SearchParams) {
-  const url = new URL("https://api.spoonacular.com/recipes/complexSearch");
+  const url = new URL(`${BASE_URL}/recipes/complexSearch`);
 
   if (params.query) url.searchParams.append("query", params.query);
   if (params.cuisine && params.cuisine !== "All Categories") {
@@ -29,18 +29,22 @@ export async function searchRecipes(params: SearchParams) {
 
   if (params.sort === "Fast") {
     url.searchParams.append("maxReadyTime", "20");
+  } else if (params.maxReadyTime) {
+    url.searchParams.append("maxReadyTime", params.maxReadyTime);
   }
 
   url.searchParams.append("apiKey", process.env.SPOONACULAR_API_KEY!);
 
   const response = await fetch(url.toString());
+
+  if (!response.ok) throw new Error("Error fetching recipes");
+
   return response.json();
 }
 
 export async function getRandomRecipes() {
-  console.log("API KEY:", process.env.SPOONACULAR_API_KEY);
   const res = await fetch(
-    `https://api.spoonacular.com/recipes/random?number=12&apiKey=${process.env.SPOONACULAR_API_KEY}`,
+    `${BASE_URL}/recipes/random?number=12&apiKey=${process.env.SPOONACULAR_API_KEY}`,
   );
 
   if (!res.ok) {

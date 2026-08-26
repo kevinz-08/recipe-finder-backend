@@ -63,6 +63,11 @@ router.get("/popular", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({ error: "Invalid recipe id" });
+    }
+
     const data = await getRecipeById(id);
     res.json(data);
   } catch (error) {
