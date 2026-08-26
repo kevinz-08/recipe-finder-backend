@@ -1,8 +1,7 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 
-/* ============================= */
-/* 1️⃣ Tipado del payload */
-/* ============================= */
+/* Tipado del payload */
+
 
 export interface JwtUserPayload {
   id: string;
@@ -14,9 +13,8 @@ interface JwtPayload {
   user: JwtUserPayload;
 }
 
-/* ============================= */
-/* 2️⃣ Función interna para firmar */
-/* ============================= */
+
+/* Función interna para firmar */
 
 function sign(payload: JwtPayload, isAccesToken: boolean): string {
   const secret = isAccesToken
@@ -35,9 +33,7 @@ function sign(payload: JwtPayload, isAccesToken: boolean): string {
   return jwt.sign(payload, secret, options);
 }
 
-/* ============================= */
-/* 3️⃣ Generadores públicos */
-/* ============================= */
+/* Generadores públicos */
 
 export function generateAccesToken(user: JwtUserPayload): string {
   return sign({ user }, true);
