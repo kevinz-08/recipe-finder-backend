@@ -27,7 +27,7 @@ router.post("/", async (req: Request, res: Response): Promise<Response> => {
 
     const payload = verifyRefreshToken(found.token);
 
-    if (!payload) {
+    if (!payload || !payload.user) {
       return res
         .status(401)
         .json(jsonresponse(401, { error: "Unauthorized" }));

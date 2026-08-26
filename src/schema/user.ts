@@ -13,7 +13,7 @@ export interface IUser {
 
   comparePassword(password: string): Promise<boolean>;
   createAccesToken(): string;
-  createRefreshToken(): Promise<string | undefined>;
+  createRefreshToken(): Promise<string>;
 }
 
 export type UserDocument = HydratedDocument<IUser>;
@@ -59,15 +59,13 @@ UserSchema.methods.createAccesToken = function (
 
 UserSchema.methods.createRefreshToken = async function (
   this: UserDocument
-): Promise<string | undefined> {
+): Promise<string> {
   const refreshToken = generateRefreshToken(getUserInfo(this));
 
-  try {
-    await new Token({ token: refreshToken }).save();
-    return refreshToken;
-  } catch (error) {
-    console.error(error);
-  }
+  // si el token no se persiste no hay sesion que refrescar: que falle el login
+  await new Token({ token: refreshToken }).save();
+
+  return refreshToken;
 };
 
 /* Modelo */
